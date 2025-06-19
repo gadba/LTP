@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinturas Mañongo - Catálogo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-line-1">
+                <div class="logo">
+                    <img src="logo.png" alt="Logo de Pinturas Mañongo">
+                    <span>Pinturas Mañongo</span>
+                </div>
+                <div id="search-container" class="search-container">
+                    <input type="search" id="search-input" placeholder="Buscar producto..." autocomplete="off">
+                    <button id="clear-search-btn" title="Limpiar búsqueda">×</button>
+                </div>
+                <div class="header-controls">
+                    <div id="offer-mode-container" class="offer-mode-switch">
+                        <label for="offer-toggle">Ofertas</label>
+                        <label class="switch small-switch">
+                            <input type="checkbox" id="offer-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="bcv-rate-display" class="rate-container"></div>
+                </div>
+            </div>
+            <div class="header-line-2">
+                <div id="menu-tabs-container" class="menu-nav"></div>
+            </div>
+            <div class="header-line-3">
+                <div id="tipo-tabs-container" class="tipo-nav"></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="catalog-content-container" class="content-area">
+            <div id="loading-indicator">Cargando catálogo...</div>
+        </div>
+    </main>
+    
+    <!-- NUEVO: Modal para seleccionar la tienda -->
+    <div id="store-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h1>Bienvenido</h1>
+            <p>Por favor, seleccione una tienda para continuar:</p>
+            <div id="store-buttons-container" class="store-buttons-container">
+                <!-- Los botones de las tiendas se insertarán aquí con JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="rate-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h1>Establecer Tasa BCV</h1>
+            <p>Por favor, introduce la tasa de cambio del día (BCV) para continuar:</p>
+            <form id="rate-form">
+                <label for="rate-input">Tasa BCV:</label>
+                <input type="text" id="rate-input" name="rate-input" autocomplete="off" inputmode="decimal" placeholder="Ej: 36.50">
+                <button type="submit" class="modal-button">Continuar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
