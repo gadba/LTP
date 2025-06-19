@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         "Sureinca": "Pinturas Sureinca Aragua"
     };
 
-    // NUEVO: Mapeo de contraseñas por tienda
     const STORE_PASSWORDS = {
         "Manongo": "314214772",
         "Sureinca": "314498711"
@@ -32,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ELEMENTOS DEL DOM ---
     const elements = {
         body: document.body,
+        initialWelcomeMessage: document.getElementById('initial-welcome-message'),
         logoSpan: document.querySelector('.logo span'),
         menuTabsContainer: document.getElementById('menu-tabs-container'),
         tipoTabsContainer: document.getElementById('tipo-tabs-container'),
@@ -123,15 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- MANEJADORES DE EVENTOS Y FLUJO ---
-
-    // MODIFICADO: Se añade la lógica de autenticación
     function handleStoreSelection(event) {
         if (!event.target.matches('.store-button')) return;
 
         const storeName = event.target.dataset.store;
         const expectedPassword = STORE_PASSWORDS[storeName];
         
-        // Si no hay contraseña definida para la tienda, se permite el acceso directo (opcional)
         if (!expectedPassword) {
             proceedToNextStep(storeName);
             return;
@@ -146,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NUEVO: Función auxiliar para continuar el flujo tras la autenticación
     function proceedToNextStep(storeName) {
         state.selectedStore = storeName;
         elements.logoSpan.textContent = STORE_DISPLAY_NAMES[storeName] || storeName;
@@ -273,9 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function initialFetchAndSetup() {
-        elements.body.classList.add('app-loading');
-        showLoading(true, 'Cargando datos...');
-        
         try {
             const response = await fetch(API_URL);
             if (!response.ok) throw new Error(`Error de red: ${response.status} ${response.statusText}`);
@@ -297,13 +290,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     button.dataset.store = storeName;
                     elements.storeButtonsContainer.appendChild(button);
                 });
-                showLoading(false);
-                elements.storeModalOverlay.classList.add('visible');
+                
+                elements.initialWelcomeMessage.classList.add('hidden');
+                setTimeout(() => {
+                    elements.storeModalOverlay.classList.add('visible');
+                }, 500);
+
             } else {
                 throw new Error("No se encontraron tiendas en los datos.");
             }
         } catch (error) {
-            showLoading(true, `Error: ${error.message}. Recargue la página.`);
+            elements.initialWelcomeMessage.querySelector('span').textContent = `Error: ${error.message}. Recargue la página.`;
         }
     }
 
