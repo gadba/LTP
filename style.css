@@ -125,6 +125,9 @@ header {
 .table-wrapper { overflow-x: auto; background: var(--card-background); border-radius: 8px; padding: 0.5rem; }
 .catalog-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
 .catalog-table th, .catalog-table td { padding: 0.8rem 0.6rem; text-align: left; white-space: normal; vertical-align: middle; font-weight: 700; }
+/* NUEVO: cursor pointer en las celdas del cuerpo de la tabla */
+.catalog-table tbody td { cursor: pointer; }
+
 .catalog-table thead th { background-color: var(--table-header-bg); color: var(--accent-yellow); font-size: 0.8em; text-transform: uppercase; position: sticky; top: 0; z-index: 10; box-shadow: inset 0 -2px 0 var(--primary-blue); text-align: center; }
 .catalog-table thead .col-producto { text-align: left; }
 .catalog-table tbody tr { border-bottom: 1px solid var(--primary-blue); }
@@ -156,8 +159,8 @@ input:checked + .slider:before { transform: translateX(18px); }
 /* --- MODAL --- */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 1rem; }
 .modal-overlay.visible { display: flex; }
-.modal-content { background-color: var(--primary-blue); padding: 2rem; border-radius: 16px; border: 2px solid var(--accent-yellow); box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; }
-.modal-content h1 { color: var(--accent-yellow); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700; }
+.modal-content { background-color: var(--primary-blue); padding: 2rem; border-radius: 16px; border: 2px solid var(--accent-yellow); box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; position: relative; }
+.modal-content h1 { color: var(--accent-yellow); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700; padding-right: 30px; } /* Padding para no solapar con el botón de cerrar */
 .modal-content p { color: var(--text-light); font-size: 1rem; margin-bottom: 1.5rem; }
 .modal-content form { display: flex; flex-direction: column; gap: 1.5rem; }
 .modal-content label { font-size: 1.1rem; font-weight: 600; }
@@ -165,6 +168,42 @@ input:checked + .slider:before { transform: translateX(18px); }
 .modal-content input[type="text"]:focus { box-shadow: 0 0 10px rgba(255, 214, 98, 0.5); }
 .modal-button { background-color: var(--accent-yellow); color: var(--dark-background); border: none; padding: 0.8rem 1.5rem; font-size: 1.1rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
 .modal-button:hover { transform: scale(1.05); }
+
+/* NUEVO: Estilos para el modal de detalle y su botón de cerrar */
+.close-modal-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 2.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.5rem;
+}
+#product-detail-content {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    text-align: left;
+}
+#product-detail-content ul {
+    list-style: none;
+    padding: 0;
+}
+#product-detail-content li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+}
+#product-detail-content li:last-child {
+    border-bottom: none;
+}
+#product-detail-content li strong {
+    color: var(--accent-yellow);
+    font-weight: 700;
+}
 
 /* Estilos para la modal de tiendas */
 .store-buttons-container { display: flex; flex-direction: column; gap: 1rem; }
