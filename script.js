@@ -45,7 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
         rateForm: document.getElementById('rate-form'),
         rateInput: document.getElementById('rate-input'),
         searchInput: document.getElementById('search-input'),
-        clearSearchBtn: document.getElementById('clear-search-btn')
+        clearSearchBtn: document.getElementById('clear-search-btn'),
+        // NUEVO: Elementos del modal de detalle
+        productDetailModalOverlay: document.getElementById('product-detail-modal-overlay'),
+        detailModalProductName: document.getElementById('detail-modal-product-name'),
+        productDetailContent: document.getElementById('product-detail-content'),
+        closeDetailModalBtn: document.getElementById('close-detail-modal-btn'),
     };
     
     // --- FUNCIONES DE RENDERIZADO ---
@@ -101,7 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const precioEnBs = BS_FORMATTER.format(rawPrecioBs);
                 const abbreviatedPres = ABBREVIATIONS[product.pres] || product.pres;
                 let productCellHtml = isFirstRowOfBlock ? `<td class="col-producto product-block-header" rowspan="${productGroup.length}">${product.name}</td>` : '';
-                tableRowsHtml += `<tr>${productCellHtml}<td class="col-pres">${abbreviatedPres}</td><td class="col-precio-usd price-col"><span>$${product.normalPrice.toFixed(2)}</span></td><td class="col-precio-bs price-col"><span class="price-bs">Bs. ${precioEnBs}</span></td><td class="col-precio-desc price-col"><span class="price-special">$${product.specialPrice.toFixed(2)}</span></td></tr>`;
+                
+                // MODIFICADO: Se añaden atributos data-* a la fila <tr>
+                const dataAttributes = `data-name="${product.name}" data-pres="${product.pres}" data-price-normal="${product.normalPrice}" data-price-special="${product.specialPrice}"`;
+
+                tableRowsHtml += `<tr ${dataAttributes}>${productCellHtml}<td class="col-pres">${abbreviatedPres}</td><td class="col-precio-usd price-col"><span>$${product.normalPrice.toFixed(2)}</span></td><td class="col-precio-bs price-col"><span class="price-bs">Bs. ${precioEnBs}</span></td><td class="col-precio-desc price-col"><span class="price-special">$${product.specialPrice.toFixed(2)}</span></td></tr>`;
             });
         });
         
@@ -123,6 +132,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- MANEJADORES DE EVENTOS Y FLUJO ---
+
+    // NUEVO: Manejador para clics en la tabla
+    function handleTableClick(event) {
+        const cell = event.target.closest('td');
+        if (!cell) return; // No se hizo clic en una celda
+        
+        const row = cell.parentElement;
+        const data = row.dataset;
+
+        if (!data.name) return; // La fila no tiene datos (p. ej. el thead)
+
+        const normalPrice = parseFloat(data.priceNormal);
+        const specialPrice = parseFloat(data.priceSpecial);
+        const priceInBs = normalPrice * state.bcvRate;
+
+        elements.detailModalProductName.textContent = data.name;
+
+        let detailsHtml = '<ul>';
+        detailsHtml += `<li>Presentación: <strong>${data.pres}</strong></li>`;
+        detailsHtml += `<li>Precio $: <strong>${normalPrice.toFixed(2)}</strong></li>`;
+        detailsHtml += `<li>Precio Bs: <strong class="price-bs">${BS_FORMATTER.format(priceInBs)}</strong></li>`;
+        if (state.isOfferMode) {
+            detailsHtml += `<li>Precio Oferta $: <strong>${specialPrice.toFixed(2)}</strong></li>`;
+        }
+        detailsHtml += '</ul>';
+
+        elements.productDetailContent.innerHTML = detailsHtml;
+        elements.productDetailModalOverlay.classList.add('visible');
+    }
+
+    // NUEVO: Función para cerrar el modal de detalles
+    function closeDetailModal() {
+        elements.productDetailModalOverlay.classList.remove('visible');
+    }
+
     function handleStoreSelection(event) {
         if (!event.target.matches('.store-button')) return;
 
@@ -182,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.isOfferMode = false;
         }
         updateBodyClasses();
+        renderProductTable(); // Re-renderizar para que el modo oferta se refleje en el modal si está abierto
     }
 
     function handleSearchInput(event) {
@@ -261,6 +306,15 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.tipoTabsContainer.addEventListener('click', handleTipoTabClick);
         elements.searchInput.addEventListener('input', handleSearchInput);
         elements.clearSearchBtn.addEventListener('click', handleClearSearch);
+        
+        // NUEVO: Listeners para el modal de detalles
+        elements.contentContainer.addEventListener('click', handleTableClick);
+        elements.closeDetailModalBtn.addEventListener('click', closeDetailModal);
+        elements.productDetailModalOverlay.addEventListener('click', (event) => {
+            if (event.target === elements.productDetailModalOverlay) {
+                closeDetailModal();
+            }
+        });
     }
     
     function initializeAppUI() {
