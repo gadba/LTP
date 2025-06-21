@@ -124,7 +124,6 @@ header {
 .presentations-table thead th {
     color: var(--accent-yellow);
     font-size: 0.9em;
-    /* text-transform: uppercase; */ /* CORREGIDO: Comentado para mostrar como está en los datos */
 }
 .presentations-table tbody tr { border: none; }
 .presentations-table tbody tr:not(.offer-row) td:first-child {
@@ -220,3 +219,242 @@ input:checked + .slider:before { transform: translateX(18px); }
 
 body.app-loading header,
 body.app-loading main { display: none; }
+
+/* --- ESTILOS PARA LA FUNCIONALIDAD DE COTIZACIÓN --- */
+
+/* Botón Flotante (FAB) */
+.quote-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--accent-yellow);
+    color: var(--dark-background);
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    cursor: pointer;
+    z-index: 1500;
+    transition: transform 0.3s, background-color 0.3s;
+    transform: scale(0); /* Oculto por defecto */
+}
+body:not(.app-loading) .quote-fab {
+    transform: scale(1); /* Visible cuando la app carga */
+}
+.quote-fab:hover {
+    transform: scale(1.1);
+}
+.quote-fab svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2.5;
+}
+.quote-item-count {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: var(--label-coral);
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--accent-yellow);
+}
+
+/* Modal de Detalles Mejorado */
+.add-to-quote-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.quantity-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+.quantity-control label {
+    font-size: 1rem;
+    font-weight: 600;
+}
+.quantity-control input[type="number"] {
+    width: 80px;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: var(--dark-background);
+    border: 2px solid var(--accent-yellow);
+    color: var(--text-light);
+    border-radius: 6px;
+    -moz-appearance: textfield;
+}
+.quantity-control input[type="number"]::-webkit-outer-spin-button,
+.quantity-control input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Modal de Cotización */
+.modal-content.large-modal {
+    max-width: 900px;
+}
+#quote-content-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+.quote-empty-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.7);
+}
+.quote-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.quote-table th, .quote-table td {
+    padding: 0.8rem 0.5rem;
+    border-bottom: 1px solid var(--card-row-dark);
+}
+.quote-table thead {
+    position: sticky;
+    top: 0;
+    background-color: var(--primary-blue);
+    z-index: 1;
+}
+.quote-table th {
+    font-size: 0.9rem;
+    color: var(--accent-yellow);
+    text-align: left;
+}
+.quote-table .col-product { width: 40%; }
+.quote-table .col-qty, .quote-table .col-delete { width: 15%; text-align: center; }
+.quote-table .col-price, .quote-table .col-total { width: 15%; text-align: right; }
+
+.quote-product-name { font-weight: 600; }
+.quote-product-pres { font-size: 0.85em; color: rgba(255, 255, 255, 0.7); }
+
+.quote-qty-controls { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.quote-qty-btn {
+    background-color: var(--card-background);
+    color: var(--accent-yellow);
+    border: 1px solid var(--accent-yellow);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+}
+.quote-qty-value { font-size: 1.1rem; font-weight: 700; min-width: 30px; text-align: center; }
+
+.quote-delete-btn {
+    background: none; border: none; color: var(--label-coral); font-size: 1.5rem; cursor: pointer;
+}
+
+.quote-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-items: flex-end; /* Alinear verticalmente */
+}
+#quote-footer > div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+@media(min-width: 480px) {
+    #quote-footer > div:last-child {
+        flex-direction: row; /* En pantallas más grandes, botones en línea */
+    }
+}
+#quote-totals {
+    text-align: right;
+    font-size: 1.1rem;
+}
+#quote-totals .total-line {
+    margin-bottom: 0.5rem;
+}
+#quote-totals .total-label {
+    color: rgba(255,255,255,0.8);
+}
+#quote-totals .total-value {
+    font-weight: 700;
+    color: var(--accent-yellow);
+    min-width: 150px;
+    display: inline-block;
+    text-align: right;
+}
+.modal-button.secondary-button {
+    background-color: #555;
+    color: white;
+}
+.modal-button.secondary-button:hover {
+    background-color: var(--label-coral);
+}
+
+/* Estilos para los controles de color y cantidad en el modal de detalle */
+.quote-controls-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap; /* Para que se vea bien en pantallas pequeñas */
+}
+
+.color-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.color-control label {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.color-control input[type="text"] {
+    width: 150px;
+    padding: 0.5rem;
+    font-size: 1.1rem;
+    background-color: var(--dark-background);
+    border: 2px solid var(--accent-yellow);
+    color: var(--text-light);
+    border-radius: 6px;
+    outline: none;
+}
+
+/* Para la visualización en la tabla de cotización */
+.quote-product-color {
+    font-size: 0.9em;
+    color: var(--accent-yellow);
+    font-style: italic;
+    margin-left: 5px;
+}
+
+/* Estilo para la línea de oferta en el modal */
+#quote-totals .offer-total-line .total-label,
+#quote-totals .offer-total-line .total-value {
+    color: var(--label-green);
+    font-weight: 700;
+}
