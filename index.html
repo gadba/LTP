@@ -51,6 +51,12 @@
             <div id="loading-indicator">Cargando catálogo...</div>
         </div>
     </main>
+
+    <!-- BOTÓN FLOTANTE PARA LA COTIZACIÓN -->
+    <button id="quote-fab" class="quote-fab" title="Ver Cotización">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+        <span id="quote-item-count" class="quote-item-count">0</span>
+    </button>
     
     <div id="store-modal-overlay" class="modal-overlay">
         <div class="modal-content">
@@ -78,8 +84,46 @@
             <button id="close-detail-modal-btn" class="close-modal-btn">×</button>
             <h1 id="detail-modal-product-name">Detalles del Producto</h1>
             <div id="product-detail-content"></div>
+            <!-- SECCIÓN PARA AÑADIR A COTIZACIÓN CON CAMPO DE COLOR -->
+            <div id="add-to-quote-section" class="add-to-quote-section">
+                <div class="quote-controls-wrapper">
+                    <div class="quantity-control">
+                        <label for="quantity-input">Cantidad:</label>
+                        <input type="number" id="quantity-input" value="1" min="1" step="1">
+                    </div>
+                    <div class="color-control">
+                        <label for="color-input">Color:</label>
+                        <input type="text" id="color-input" placeholder="Ej: Blanco">
+                    </div>
+                </div>
+                <button id="add-to-quote-btn" class="modal-button">Añadir a Cotización</button>
+            </div>
         </div>
     </div>
+
+    <!-- MODAL PARA LA COTIZACIÓN -->
+    <div id="quote-modal-overlay" class="modal-overlay">
+        <div class="modal-content large-modal">
+            <button id="close-quote-modal-btn" class="close-modal-btn">×</button>
+            <h1>Cotización</h1>
+            <div id="quote-content-container">
+                <!-- El contenido de la cotización se generará aquí -->
+            </div>
+            <div id="quote-footer" class="quote-footer">
+                <div id="quote-totals">
+                    <!-- Los totales se mostrarán aquí -->
+                </div>
+                <div> <!-- Contenedor para los botones -->
+                    <button id="download-quote-pdf-btn" class="modal-button">Descargar PDF</button>
+                    <button id="clear-quote-btn" class="modal-button secondary-button">Limpiar Cotización</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIBRERÍAS PARA GENERAR PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <script src="script.js" defer></script>
 </body>
