@@ -6,9 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const STORE_DISPLAY_NAMES = { "Manongo": "Pinturas Mañongo", "Sureinca": "Pinturas Sureinca Aragua" };
     const STORE_PASSWORDS = { "Manongo": "314214772", "Sureinca": "314498711" };
+    
+    const STORE_DETAILS = {
+        "Manongo": {
+            rif: "J-31421477-2",
+            contact: "Tlf: 0414-9409606   pinturasmanongo@gmail.com"
+        },
+        "Sureinca": {
+            rif: "J-31449871-1",
+            contact: "Tlf: 0243-2367809   sureinca_aragua@hotmail.com"
+        }
+    };
+    
     const BS_FORMATTER = new Intl.NumberFormat('es-ES', { useGrouping: true, minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const state = { fullStoreData: [], storeData: {}, selectedStore: null, isOfferMode: false, activeMenu: null, activeTipo: null, searchTerm: '', bcvRate: 0 };
+    const state = { 
+        fullStoreData: [], storeData: {}, selectedStore: null, isOfferMode: false, 
+        activeMenu: null, activeTipo: null, searchTerm: '', bcvRate: 0,
+        quote: [], productForDetailModal: null 
+    };
 
     const elements = {
         body: document.body, initialWelcomeMessage: document.getElementById('initial-welcome-message'),
@@ -21,6 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput: document.getElementById('search-input'), clearSearchBtn: document.getElementById('clear-search-btn'),
         productDetailModalOverlay: document.getElementById('product-detail-modal-overlay'), detailModalProductName: document.getElementById('detail-modal-product-name'),
         productDetailContent: document.getElementById('product-detail-content'), closeDetailModalBtn: document.getElementById('close-detail-modal-btn'),
+        addToQuoteBtn: document.getElementById('add-to-quote-btn'), 
+        quantityInput: document.getElementById('quantity-input'),
+        colorInput: document.getElementById('color-input'),
+        quoteFab: document.getElementById('quote-fab'), quoteItemCount: document.getElementById('quote-item-count'),
+        quoteModalOverlay: document.getElementById('quote-modal-overlay'), closeQuoteModalBtn: document.getElementById('close-quote-modal-btn'),
+        quoteContentContainer: document.getElementById('quote-content-container'), quoteFooter: document.getElementById('quote-footer'),
+        clearQuoteBtn: document.getElementById('clear-quote-btn'),
+        downloadQuotePdfBtn: document.getElementById('download-quote-pdf-btn')
     };
     
     // --- RENDERIZADO ---
@@ -39,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(state.storeData).forEach(menuName => elements.menuTabsContainer.appendChild(createTab(menuName, 'menu', menuName === state.activeMenu, 'menu-button')));
         elements.tipoTabsContainer.innerHTML = '';
         if (state.activeMenu && state.storeData[state.activeMenu]) {
-            // MODIFICADO: Se leen los tipos ya ordenados
             Object.keys(state.storeData[state.activeMenu]).sort((a,b) => a.localeCompare(b)).forEach(tipoName => {
                 elements.tipoTabsContainer.appendChild(createTab(tipoName, 'tipo', tipoName === state.activeTipo, 'tipo-button'));
             });
@@ -107,25 +130,323 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleContentClick(event) {
         const cell = event.target.closest('td.price-cell');
         if (!cell || !cell.dataset.name) return;
-        const data = cell.dataset;
-        const normalPrice = parseFloat(data.priceNormal);
-        const specialPrice = parseFloat(data.priceSpecial);
+        const { name, pres } = cell.dataset;
+        
+        const product = state.fullStoreData.find(p => 
+            p.tienda === state.selectedStore && p.name === name && p.pres === pres
+        );
+        if (!product) return;
+
+        state.productForDetailModal = product;
+        
+        const normalPrice = product.normalPrice;
+        const specialPrice = product.specialPrice;
         const priceInBs = normalPrice * state.bcvRate;
-        elements.detailModalProductName.textContent = data.name;
+        
+        elements.detailModalProductName.textContent = product.name;
+        
         let detailsHtml = '<ul>';
-        detailsHtml += `<li><span class="detail-label">Presentación:</span><strong class="detail-value">${data.pres}</strong></li>`;
+        detailsHtml += `<li><span class="detail-label">Presentación:</span><strong class="detail-value">${product.pres}</strong></li>`;
         detailsHtml += `<li><span class="detail-label">Precio $:</span><strong class="detail-value">${normalPrice.toFixed(2)}</strong></li>`;
         detailsHtml += `<li><span class="detail-label">Precio Bs:</span><strong class="detail-value">${BS_FORMATTER.format(priceInBs)}</strong></li>`;
         if (state.isOfferMode && specialPrice > 0) {
             detailsHtml += `<li><span class="detail-label offer-label">Pago en $:</span><strong class="detail-value">${specialPrice.toFixed(2)}</strong></li>`;
         }
         detailsHtml += '</ul>';
+        
         elements.productDetailContent.innerHTML = detailsHtml;
+        elements.quantityInput.value = 1;
+        elements.colorInput.value = '';
         elements.productDetailModalOverlay.classList.add('visible');
     }
 
-    function closeDetailModal() { elements.productDetailModalOverlay.classList.remove('visible'); }
+    function closeDetailModal() { 
+        elements.productDetailModalOverlay.classList.remove('visible'); 
+        state.productForDetailModal = null;
+    }
+    
+    // --- FUNCIONES DE COTIZACIÓN ---
 
+    function updateQuoteIndicator() {
+        const count = state.quote.reduce((sum, item) => sum + item.quantity, 0);
+        elements.quoteItemCount.textContent = count;
+        elements.quoteItemCount.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    function handleAddToQuote() {
+        const productToAdd = state.productForDetailModal;
+        if (!productToAdd) return;
+
+        const quantity = parseInt(elements.quantityInput.value, 10);
+        const color = elements.colorInput.value.trim();
+
+        if (isNaN(quantity) || quantity < 1) {
+            alert("Por favor, ingrese una cantidad válida.");
+            return;
+        }
+        
+        const itemId = `${productToAdd.name}-${productToAdd.pres}-${color}`;
+
+        const existingQuoteItemIndex = state.quote.findIndex(item => item.id === itemId);
+
+        if (existingQuoteItemIndex > -1) {
+            state.quote[existingQuoteItemIndex].quantity += quantity;
+        } else {
+            state.quote.push({ 
+                id: itemId,
+                product: productToAdd, 
+                quantity: quantity,
+                color: color 
+            });
+        }
+
+        updateQuoteIndicator();
+        closeDetailModal();
+    }
+
+    function renderQuoteModal() {
+        if (state.quote.length === 0) {
+            elements.quoteContentContainer.innerHTML = `<p class="quote-empty-message">Aún no has añadido productos a la cotización.</p>`;
+            elements.quoteFooter.style.display = 'none';
+            return;
+        }
+
+        elements.quoteFooter.style.display = 'flex';
+        let grandTotal = 0;
+        let offerTotal = 0;
+
+        const tableRows = state.quote.map(item => {
+            const price = item.product.normalPrice;
+            const lineTotal = item.quantity * price;
+            grandTotal += lineTotal;
+            
+            if (state.isOfferMode && item.product.specialPrice > 0) {
+                offerTotal += item.quantity * item.product.specialPrice;
+            }
+            
+            const colorHtml = item.color ? `<span class="quote-product-color">(${item.color})</span>` : '';
+
+            return `
+                <tr data-id="${item.id}">
+                    <td class="col-product">
+                        <div class="quote-product-name">${item.product.name} ${colorHtml}</div>
+                        <div class="quote-product-pres">${item.product.pres}</div>
+                    </td>
+                    <td class="col-qty">
+                        <div class="quote-qty-controls">
+                            <button class="quote-qty-btn" data-action="decrease">-</button>
+                            <span class="quote-qty-value">${item.quantity}</span>
+                            <button class="quote-qty-btn" data-action="increase">+</button>
+                        </div>
+                    </td>
+                    <td class="col-price">$${price.toFixed(2)}</td>
+                    <td class="col-total"><strong>$${lineTotal.toFixed(2)}</strong></td>
+                    <td class="col-delete">
+                        <button class="quote-delete-btn" data-action="delete" title="Eliminar">×</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        elements.quoteContentContainer.innerHTML = `
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th class="col-product">Producto</th>
+                        <th class="col-qty">Cantidad</th>
+                        <th class="col-price">P. Unit.</th>
+                        <th class="col-total">Total</th>
+                        <th class="col-delete"></th>
+                    </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        `;
+        
+        const grandTotalBs = grandTotal * state.bcvRate;
+        let totalsHtml = `
+            <div class="total-line">
+                <span class="total-label">Total en Bs:</span>
+                <span class="total-value">${BS_FORMATTER.format(grandTotalBs)}</span>
+            </div>
+            <div class="total-line">
+                <span class="total-label">Total en $:</span>
+                <span class="total-value">${grandTotal.toFixed(2)}</span>
+            </div>
+        `;
+
+        if (state.isOfferMode && offerTotal > 0) {
+            totalsHtml += `
+                <div class="total-line offer-total-line">
+                    <span class="total-label">OFERTA SOLO PAGO EN $:</span>
+                    <span class="total-value">${offerTotal.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        document.getElementById('quote-totals').innerHTML = totalsHtml;
+    }
+    
+    function handleQuoteActions(event) {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+
+        const row = button.closest('tr');
+        if (!row) return;
+        
+        const itemId = row.dataset.id;
+        const action = button.dataset.action;
+
+        const itemIndex = state.quote.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) return;
+
+        if (action === 'increase') {
+            state.quote[itemIndex].quantity++;
+        } else if (action === 'decrease') {
+            state.quote[itemIndex].quantity--;
+            if (state.quote[itemIndex].quantity <= 0) {
+                state.quote.splice(itemIndex, 1);
+            }
+        } else if (action === 'delete') {
+            state.quote.splice(itemIndex, 1);
+        }
+
+        renderQuoteModal();
+        updateQuoteIndicator();
+    }
+    
+    function clearQuote() {
+        if (confirm("¿Estás seguro de que quieres limpiar toda la cotización?")) {
+            state.quote = [];
+            renderQuoteModal();
+            updateQuoteIndicator();
+        }
+    }
+    
+    function generateQuotePDF() {
+        if (state.quote.length === 0) {
+            alert("La cotización está vacía. Añade productos para generar un PDF.");
+            return;
+        }
+        
+        const clientName = prompt("Ingrese la Razón Social del cliente:", "");
+        if (clientName === null) return; 
+
+        const clientRif = prompt("Ingrese el RIF del cliente:", "");
+        if (clientRif === null) return; 
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const page_width = doc.internal.pageSize.getWidth();
+        const TAX_DIVISOR = 1.16;
+        const TAX_MULTIPLIER = 0.16;
+
+        // --- CABECERA ---
+        const storeName = STORE_DISPLAY_NAMES[state.selectedStore] || state.selectedStore;
+        const storeDetails = STORE_DETAILS[state.selectedStore];
+        const date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(storeName, 14, 22);
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text("Cotización", page_width - 14, 22, { align: 'right' });
+        
+        let startY = 30;
+        
+        if (storeDetails) {
+            doc.setFontSize(9);
+            doc.text(`RIF: ${storeDetails.rif}`, 14, startY);
+            startY += 5;
+            doc.text(storeDetails.contact, 14, startY);
+            startY += 5;
+        }
+
+        doc.setFontSize(10);
+        doc.text(`Fecha: ${date}`, 14, startY);
+        startY += 5;
+        doc.text(`Tasa BCV: ${state.bcvRate.toFixed(4)}`, 14, startY);
+        startY += 8;
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Cliente:', 14, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${clientName} / RIF: ${clientRif}`, 30, startY);
+        startY += 10;
+
+        // --- TABLA DE PRODUCTOS ---
+        const head = [['Producto', 'Presentación', 'Cant.', 'P. Unit. ($)', 'Total ($)']];
+        let subTotal = 0;
+        const body = state.quote.map(item => {
+            const listPrice = item.product.normalPrice;
+            
+            const unitPrice = listPrice / TAX_DIVISOR;
+            const lineTotal = unitPrice * item.quantity;
+            subTotal += lineTotal;
+            
+            const productNameWithColor = item.color 
+                ? `${item.product.name} (${item.color})` 
+                : item.product.name;
+
+            return [
+                productNameWithColor,
+                item.product.pres,
+                item.quantity,
+                unitPrice.toFixed(2),
+                lineTotal.toFixed(2)
+            ];
+        });
+
+        doc.autoTable({
+            head: head,
+            body: body,
+            startY: startY,
+            theme: 'striped',
+            headStyles: { fillColor: [0, 83, 156] },
+            columnStyles: {
+                0: { cellWidth: 70 },
+                2: { halign: 'center' },
+                3: { halign: 'right' },
+                4: { halign: 'right' }
+            }
+        });
+
+        // --- TOTALES ---
+        let finalY = doc.lastAutoTable.finalY + 10;
+
+        const ivaAmount = subTotal * TAX_MULTIPLIER;
+        const grandTotal = subTotal + ivaAmount;
+        
+        const grandTotalBs = grandTotal * state.bcvRate;
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+
+        doc.text('SubTotal:', 120, finalY, { align: 'right' });
+        doc.text(`$ ${subTotal.toFixed(2)}`, page_width - 14, finalY, { align: 'right' });
+        finalY += 6;
+
+        doc.text('IVA (16%):', 120, finalY, { align: 'right' });
+        doc.text(`$ ${ivaAmount.toFixed(2)}`, page_width - 14, finalY, { align: 'right' });
+        finalY += 6;
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total a Pagar:', 120, finalY, { align: 'right' });
+        doc.text(`$ ${grandTotal.toFixed(2)}`, page_width - 14, finalY, { align: 'right' });
+        
+        finalY += 6;
+        doc.text(`Bs. ${BS_FORMATTER.format(grandTotalBs)}`, page_width - 14, finalY, { align: 'right' });
+        
+        // --- GUARDAR ARCHIVO ---
+        const safeClientName = clientName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const fileName = `cotizacion-${safeClientName}-${date.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+    }
+
+    // --- MANEJADORES DE EVENTOS Y FLUJO PRINCIPAL ---
     function handleStoreSelection(event) {
         if (!event.target.matches('.store-button')) return;
         const storeName = event.target.dataset.store;
@@ -159,7 +480,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleRateClick() {
         if (!state.selectedStore) return;
         const newRateInput = prompt("Modificar Tasa BCV:", state.bcvRate.toFixed(4));
-        if (newRateInput !== null && validateAndSetRate(newRateInput)) renderProductTable();
+        if (newRateInput !== null && validateAndSetRate(newRateInput)) {
+            renderProductTable();
+            if (elements.quoteModalOverlay.classList.contains('visible')) {
+                renderQuoteModal();
+            }
+        }
     }
 
     function handleOfferToggle(event) {
@@ -173,6 +499,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateBodyClasses();
         renderProductTable();
+        if (elements.quoteModalOverlay.classList.contains('visible')) {
+            renderQuoteModal();
+        }
     }
     
     function handleSearchInput(event) {
@@ -222,7 +551,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const menus = Object.keys(state.storeData);
         if (menus.length > 0) {
             state.activeMenu = menus[0];
-            // MODIFICADO: Seleccionar el primer tipo ordenado alfabéticamente
             const tipos = Object.keys(state.storeData[state.activeMenu] || {}).sort((a,b) => a.localeCompare(b));
             state.activeTipo = tipos.length > 0 ? tipos[0] : null;
         }
@@ -232,6 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.body.classList.remove('app-loading');
         showLoading(false);
         renderUI();
+        updateQuoteIndicator();
     }
     
     async function initialFetchAndSetup() {
@@ -255,6 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => elements.storeModalOverlay.classList.add('visible'), 500);
             } else { throw new Error("No se encontraron tiendas en los datos."); }
         } catch (error) {
+            console.error("Error en initialFetchAndSetup:", error);
             elements.initialWelcomeMessage.querySelector('span').textContent = `Error: ${error.message}. Recargue la página.`;
         }
     }
@@ -270,7 +600,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.matches('.menu-button')) {
                 state.searchTerm = ''; elements.searchInput.value = ''; elements.clearSearchBtn.style.display = 'none';
                 state.activeMenu = e.target.dataset.menu; 
-                // MODIFICADO: Seleccionar el primer tipo ordenado alfabéticamente al cambiar de menú
                 const tipos = Object.keys(state.storeData[state.activeMenu] || {}).sort((a,b) => a.localeCompare(b));
                 state.activeTipo = tipos.length > 0 ? tipos[0] : null; 
                 renderUI(); 
@@ -286,6 +615,17 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.contentContainer.addEventListener('click', handleContentClick);
         elements.closeDetailModalBtn.addEventListener('click', closeDetailModal);
         elements.productDetailModalOverlay.addEventListener('click', (e) => e.target === elements.productDetailModalOverlay && closeDetailModal());
+        
+        elements.addToQuoteBtn.addEventListener('click', handleAddToQuote);
+        elements.quoteFab.addEventListener('click', () => {
+            renderQuoteModal();
+            elements.quoteModalOverlay.classList.add('visible');
+        });
+        elements.closeQuoteModalBtn.addEventListener('click', () => elements.quoteModalOverlay.classList.remove('visible'));
+        elements.quoteModalOverlay.addEventListener('click', (e) => e.target === elements.quoteModalOverlay && elements.quoteModalOverlay.classList.remove('visible'));
+        elements.quoteContentContainer.addEventListener('click', handleQuoteActions);
+        elements.clearQuoteBtn.addEventListener('click', clearQuote);
+        elements.downloadQuotePdfBtn.addEventListener('click', generateQuotePDF);
     }
 
     setupEventListeners();
