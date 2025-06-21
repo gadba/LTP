@@ -215,6 +215,11 @@ input:checked + .slider:before { transform: translateX(18px); }
     .logo span { display: none; }
     .header-line-1 { gap: 0.5rem; }
     .content-area { padding: 1rem 0.5rem; }
+
+    /* Reduce el tamaño de la fuente del valor en Bs. solo en las tarjetas de producto en móviles */
+    .product-card .presentations-table .price-bs {
+        font-size: 0.8em; /* 20% más pequeño que el 1em por defecto */
+    }
 }
 
 body.app-loading header,
@@ -457,4 +462,56 @@ body:not(.app-loading) .quote-fab {
 #quote-totals .offer-total-line .total-value {
     color: var(--label-green);
     font-weight: 700;
+}
+
+/* --- Estilos para el nuevo Modal de Info de Cliente --- */
+
+.modal-content form {
+    margin-top: 1.5rem;
+}
+
+.modal-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.modal-form-group label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-yellow);
+}
+
+.modal-input {
+    background-color: var(--dark-background);
+    border: 2px solid var(--accent-yellow);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    color: var(--text-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+    outline: none;
+    width: 100%;
+}
+
+.modal-button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    margin-top: 2rem;
+}
+
+/* Ajuste para que el botón secundario no ocupe todo el espacio */
+.modal-button-group .modal-button {
+    flex-grow: 1; /* Por defecto, que crezcan */
+}
+
+@media(min-width: 480px) {
+    .modal-button-group .modal-button {
+        flex-grow: 0; /* En pantallas más grandes, que tengan su tamaño natural */
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
 }
