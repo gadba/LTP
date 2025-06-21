@@ -121,6 +121,29 @@
         </div>
     </div>
 
+    <!-- MODAL PARA INFORMACIÓN DEL CLIENTE (NUEVO) -->
+    <div id="client-info-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-client-info-modal-btn" class="close-modal-btn">×</button>
+            <h1>Datos para la Cotización</h1>
+            <p>Por favor, ingrese los datos del cliente para generar el PDF.</p>
+            <form id="client-info-form">
+                <div class="modal-form-group">
+                    <label for="client-name-input">Razón Social:</label>
+                    <input type="text" id="client-name-input" class="modal-input" placeholder="Nombre de la empresa o persona" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="client-rif-input">RIF / C.I.:</label>
+                    <input type="text" id="client-rif-input" class="modal-input" placeholder="J-12345678-9" required>
+                </div>
+                <div class="modal-button-group">
+                    <button type="button" id="cancel-client-info-btn" class="modal-button secondary-button">Cancelar</button>
+                    <button type="submit" class="modal-button">Generar PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- LIBRERÍAS PARA GENERAR PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
