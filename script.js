@@ -44,7 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
         quoteModalOverlay: document.getElementById('quote-modal-overlay'), closeQuoteModalBtn: document.getElementById('close-quote-modal-btn'),
         quoteContentContainer: document.getElementById('quote-content-container'), quoteFooter: document.getElementById('quote-footer'),
         clearQuoteBtn: document.getElementById('clear-quote-btn'),
-        downloadQuotePdfBtn: document.getElementById('download-quote-pdf-btn')
+        downloadQuotePdfBtn: document.getElementById('download-quote-pdf-btn'),
+        clientInfoModalOverlay: document.getElementById('client-info-modal-overlay'),
+        closeClientInfoModalBtn: document.getElementById('close-client-info-modal-btn'),
+        cancelClientInfoBtn: document.getElementById('cancel-client-info-btn'),
+        clientInfoForm: document.getElementById('client-info-form'),
+        clientNameInput: document.getElementById('client-name-input'),
+        clientRifInput: document.getElementById('client-rif-input')
     };
     
     // --- RENDERIZADO ---
@@ -215,7 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let grandTotal = 0;
         let offerTotal = 0;
 
-        const tableRows = state.quote.map(item => {
+        const sortedQuote = [...state.quote].sort((a, b) => 
+            a.product.name.localeCompare(b.product.name)
+        );
+
+        const tableRows = sortedQuote.map(item => {
             const price = item.product.normalPrice;
             const lineTotal = item.quantity * price;
             grandTotal += lineTotal;
@@ -323,17 +333,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function generateQuotePDF() {
+    function generateQuotePDF(clientName, clientRif) { 
         if (state.quote.length === 0) {
             alert("La cotización está vacía. Añade productos para generar un PDF.");
             return;
         }
-        
-        const clientName = prompt("Ingrese la Razón Social del cliente:", "");
-        if (clientName === null) return; 
 
-        const clientRif = prompt("Ingrese el RIF del cliente:", "");
-        if (clientRif === null) return; 
+        if (!clientName || !clientRif) {
+            alert("Los datos del cliente son necesarios para generar el PDF.");
+            return;
+        }
 
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -373,13 +382,18 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont('helvetica', 'bold');
         doc.text('Cliente:', 14, startY);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${clientName} / RIF: ${clientRif}`, 30, startY);
+        doc.text(`${clientName} / RIF: ${clientRif}`, 30, startY); 
         startY += 10;
 
         // --- TABLA DE PRODUCTOS ---
         const head = [['Producto', 'Presentación', 'Cant.', 'P. Unit. ($)', 'Total ($)']];
         let subTotal = 0;
-        const body = state.quote.map(item => {
+        
+        const sortedQuoteForPDF = [...state.quote].sort((a, b) => 
+            a.product.name.localeCompare(b.product.name)
+        );
+
+        const body = sortedQuoteForPDF.map(item => {
             const listPrice = item.product.normalPrice;
             
             const unitPrice = listPrice / TAX_DIVISOR;
@@ -625,7 +639,36 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.quoteModalOverlay.addEventListener('click', (e) => e.target === elements.quoteModalOverlay && elements.quoteModalOverlay.classList.remove('visible'));
         elements.quoteContentContainer.addEventListener('click', handleQuoteActions);
         elements.clearQuoteBtn.addEventListener('click', clearQuote);
-        elements.downloadQuotePdfBtn.addEventListener('click', generateQuotePDF);
+
+        elements.downloadQuotePdfBtn.addEventListener('click', () => {
+            if (state.quote.length === 0) {
+                alert("Añade productos a la cotización antes de generar un PDF.");
+                return;
+            }
+            // Limpia el formulario y muestra el modal de datos del cliente
+            elements.clientInfoForm.reset();
+            elements.clientInfoModalOverlay.classList.add('visible');
+            elements.clientNameInput.focus();
+        });
+
+        // Listeners para el nuevo modal de info de cliente
+        elements.clientInfoForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const clientName = elements.clientNameInput.value.trim();
+            const clientRif = elements.clientRifInput.value.trim();
+            
+            elements.clientInfoModalOverlay.classList.remove('visible');
+            generateQuotePDF(clientName, clientRif);
+        });
+
+        const closeClientInfoModal = () => elements.clientInfoModalOverlay.classList.remove('visible');
+        elements.closeClientInfoModalBtn.addEventListener('click', closeClientInfoModal);
+        elements.cancelClientInfoBtn.addEventListener('click', closeClientInfoModal);
+        elements.clientInfoModalOverlay.addEventListener('click', (e) => {
+            if (e.target === elements.clientInfoModalOverlay) {
+                closeClientInfoModal();
+            }
+        });
     }
 
     setupEventListeners();
