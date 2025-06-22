@@ -1,4 +1,4 @@
-/* style.css - Versión 2.5: Diseño con decimales estilizados para todos los precios */
+/* style.css - Versión 2.6: Decimales estilizados solo para Precio Bs. */
 /* Por Gemini - Foco en legibilidad, UI limpia y experiencia de usuario profesional */
 
 :root {
@@ -185,7 +185,7 @@ header {
     margin-top: 4px;
 }
 
-/* --- NUEVO ESTILO PARA DECIMALES (22-06-2025) --- */
+/* --- ESTILO PARA DECIMALES (SOLO EN BS) --- */
 .price-decimal {
     font-size: 0.65em; /* Más pequeño que la parte entera */
     color: var(--text-secondary); /* Color más sutil */
