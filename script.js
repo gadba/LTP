@@ -97,17 +97,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardsHtml += `<div class="product-card"><h3 class="product-card-title">${firstProduct.name}</h3><div class="table-responsive-wrapper"><table class="presentations-table"><thead><tr><th></th>`;
                 productGroup.forEach(p => { cardsHtml += `<th>${ABBREVIATIONS[p.pres] || p.pres}</th>`; });
                 cardsHtml += `</tr></thead><tbody>`;
+                
+                // Fila Precio $
                 cardsHtml += `<tr class="price-row"><td>Precio $</td>`;
-                productGroup.forEach(p => cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${p.normalPrice.toFixed(2)}</td>`);
+                productGroup.forEach(p => {
+                    const priceParts = p.normalPrice.toFixed(2).split('.');
+                    const priceHtml = `<span class="price-integer">${priceParts[0]}</span><span class="price-decimal">.${priceParts[1]}</span>`;
+                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${priceHtml}</td>`;
+                });
                 cardsHtml += `</tr>`;
+
+                // Fila Precio Bs.
                 cardsHtml += `<tr class="price-row"><td>Precio Bs.</td>`;
                 productGroup.forEach(p => {
                     const precioEnBs = p.normalPrice * state.bcvRate;
-                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}"><span class="price-bs">${BS_FORMATTER.format(precioEnBs)}</span></td>`;
+                    const bsPriceString = BS_FORMATTER.format(precioEnBs);
+                    const priceParts = bsPriceString.split(',');
+                    const priceHtml = `<span class="price-bs"><span class="price-integer">${priceParts[0]}</span><span class="price-decimal">,${priceParts[1]}</span></span>`;
+                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${priceHtml}</td>`;
                 });
                 cardsHtml += `</tr>`;
+
+                // Fila Oferta Pago en $
                 cardsHtml += `<tr class="offer-row price-row"><td>Pago en $</td>`;
-                productGroup.forEach(p => cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${p.specialPrice.toFixed(2)}</td>`);
+                productGroup.forEach(p => {
+                    const priceParts = p.specialPrice.toFixed(2).split('.');
+                    const priceHtml = `<span class="price-integer">${priceParts[0]}</span><span class="price-decimal">.${priceParts[1]}</span>`;
+                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${priceHtml}</td>`;
+                });
                 cardsHtml += `</tr></tbody></table></div></div>`;
             }
         });
