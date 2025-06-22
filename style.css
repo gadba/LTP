@@ -1,4 +1,4 @@
-/* style.css - Versión 2.0: Diseño Moderno y Vanguardista */
+/* style.css - Versión 2.3: Diseño Moderno y Vanguardista con Todos los Ajustes */
 /* Por Gemini - Foco en legibilidad, UI limpia y experiencia de usuario profesional */
 
 :root {
@@ -251,6 +251,7 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
 /* --- MEDIA QUERIES --- */
 @media (min-width: 1024px) { .product-card-container { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 768px) { .content-area { padding: 2rem; } .logo img { height: 35px; } }
+
 @media (max-width: 767px) {
     body { font-size: 14px; }
     .logo span { display: none; }
@@ -258,7 +259,21 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
     .header-line-1 { flex-wrap: wrap; }
     .search-container { order: 3; width: 100%; margin-top: 0.75rem; }
     .content-area { padding: 1rem 0.75rem; }
-    .product-card .presentations-table .price-bs { font-size: 0.8em; }
+
+    /* --- AJUSTE ADICIONAL (22-06-2025): Reducir fuente de precios en $ en móvil --- */
+    .product-card .presentations-table tbody > tr:first-of-type .price-cell,
+    .product-card .presentations-table .offer-row .price-cell {
+        /* El valor original era 1.2em. Reducido en un 5% (1.2 * 0.95) */
+        font-size: 1.14em;
+    }
+
+    /* --- AJUSTE ADICIONAL (22-06-2025): Reducir y poner en negrita precio en Bs. en móvil --- */
+    .product-card .presentations-table .price-bs {
+        /* El valor móvil anterior era 0.8em. Reducido en 10% (0.8 * 0.9) */
+        font-size: 0.72em; 
+        /* Añadido para poner el valor en negrita */
+        font-weight: 700; 
+    }
 }
 
 body.app-loading header,
@@ -374,4 +389,42 @@ body:not(.app-loading) .quote-fab { transform: scale(1) rotate(0deg); }
     background-color: var(--label-coral);
     border-color: var(--label-coral);
     color: white;
+}
+
+/* --- AJUSTES PARA EL MODAL DE TASA BCV (SOLICITUD 22-06-2025) --- */
+
+/* 1. Alineamos el contenido del formulario a la izquierda, como en el otro modal. */
+#rate-form {
+    text-align: left;
+    margin-top: 1.5rem; /* Añadimos un poco de espacio superior */
+}
+
+/* 2. Le damos el mismo estilo de "label" azul al texto "Tasa BCV:" */
+#rate-form label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-accent);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* 3. Hacemos el campo de entrada de la tasa ancho, más grande y prominente. */
+#rate-input {
+    background-color: var(--background-dark);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 0.8rem 1rem;
+    color: var(--text-primary);
+    font-size: 1.8rem;  /* Letra más grande para destacar la tasa */
+    font-weight: 700;
+    outline: none;
+    width: 100%; /* La clave para que sea más ancho */
+    text-align: center; /* Centramos el número dentro del campo */
+    transition: all 0.3s;
+}
+
+/* 4. Mantenemos el efecto de resaltado al hacer clic, igual que los otros campos. */
+#rate-input:focus {
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 3px rgba(0, 159, 255, 0.3);
 }
