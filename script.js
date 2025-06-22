@@ -98,16 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 productGroup.forEach(p => { cardsHtml += `<th>${ABBREVIATIONS[p.pres] || p.pres}</th>`; });
                 cardsHtml += `</tr></thead><tbody>`;
                 
-                // Fila Precio $
+                // Fila Precio $ (Formato normal)
                 cardsHtml += `<tr class="price-row"><td>Precio $</td>`;
                 productGroup.forEach(p => {
-                    const priceParts = p.normalPrice.toFixed(2).split('.');
-                    const priceHtml = `<span class="price-integer">${priceParts[0]}</span><span class="price-decimal">.${priceParts[1]}</span>`;
-                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${priceHtml}</td>`;
+                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${p.normalPrice.toFixed(2)}</td>`;
                 });
                 cardsHtml += `</tr>`;
 
-                // Fila Precio Bs.
+                // Fila Precio Bs. (Formato con decimales pequeños)
                 cardsHtml += `<tr class="price-row"><td>Precio Bs.</td>`;
                 productGroup.forEach(p => {
                     const precioEnBs = p.normalPrice * state.bcvRate;
@@ -118,12 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 cardsHtml += `</tr>`;
 
-                // Fila Oferta Pago en $
+                // Fila Oferta Pago en $ (Formato normal)
                 cardsHtml += `<tr class="offer-row price-row"><td>Pago en $</td>`;
                 productGroup.forEach(p => {
-                    const priceParts = p.specialPrice.toFixed(2).split('.');
-                    const priceHtml = `<span class="price-integer">${priceParts[0]}</span><span class="price-decimal">.${priceParts[1]}</span>`;
-                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${priceHtml}</td>`;
+                    cardsHtml += `<td class="price-cell" data-name="${p.name}" data-pres="${p.pres}" data-price-normal="${p.normalPrice}" data-price-special="${p.specialPrice}">${p.specialPrice.toFixed(2)}</td>`;
                 });
                 cardsHtml += `</tr></tbody></table></div></div>`;
             }
