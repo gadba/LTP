@@ -1,4 +1,4 @@
-/* style.css - Versión 2.3: Diseño Moderno y Vanguardista con Todos los Ajustes */
+/* style.css - Versión 2.5: Diseño con decimales estilizados para todos los precios */
 /* Por Gemini - Foco en legibilidad, UI limpia y experiencia de usuario profesional */
 
 :root {
@@ -176,7 +176,21 @@ header {
 }
 .presentations-table .price-cell:first-of-type { border-left: none; }
 .presentations-table .price-cell:hover { background-color: var(--background-light); }
-.presentations-table .price-bs { font-size: 0.85em; color: var(--text-secondary); display: block; font-weight: 500; margin-top: 4px; }
+
+.presentations-table .price-bs {
+    font-size: 0.85em; 
+    color: var(--text-secondary); 
+    display: inline-block; /* Cambiado para que los spans internos funcionen bien */
+    font-weight: 500; 
+    margin-top: 4px;
+}
+
+/* --- NUEVO ESTILO PARA DECIMALES (22-06-2025) --- */
+.price-decimal {
+    font-size: 0.65em; /* Más pequeño que la parte entera */
+    color: var(--text-secondary); /* Color más sutil */
+    font-weight: 500; /* Letra no tan gruesa */
+}
 
 .offer-row { display: none; }
 body.offer-mode-on .offer-row { display: table-row; }
